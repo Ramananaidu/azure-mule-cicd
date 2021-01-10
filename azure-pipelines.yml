@@ -5,9 +5,15 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
-- test
-- develop
-- main
+  branches:
+    include:
+      - test
+      - develop
+      - main
+  paths:
+   exclude:
+     - README.md
+     - azure-pipelines.yml
 
 pool:
   vmImage: 'ubuntu-latest'
