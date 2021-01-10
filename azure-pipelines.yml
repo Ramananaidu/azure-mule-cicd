@@ -1,0 +1,40 @@
+# Maven
+# Author : Manish
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- test
+- develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: DownloadSecureFile@1
+  name: mvnSettings
+  displayName: 'Download Maven settings'
+  inputs:
+    secureFile: 'settings.xml'
+- task: Maven@3
+  condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/test'))
+  inputs:
+    mavenPomFile: '$(system.defaultWorkingDirectory)/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    goals: 'clean deploy -DskipMunitTests -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -Denv=test -Dazure.password=$(AZURE_TOKEN) -Dnexus.username=$(NEXUS_UERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -s $(mvnSettings.secureFilePath) -e'
+
+- task: Maven@3
+  inputs:
+    mavenPomFile: '$(system.defaultWorkingDirectory)/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'clean install -Dazure.password=$(AZURE_TOKEN) -Dnexus.username=$(NEXUS_UERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -s $(mvnSettings.secureFilePath) -e'
+
