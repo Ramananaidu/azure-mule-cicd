@@ -28,6 +28,7 @@ steps:
     goals: 'clean deploy -DskipMunitTests -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -Denv=test -Dazure.password=$(AZURE_TOKEN) -Dnexus.username=$(NEXUS_UERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -s $(mvnSettings.secureFilePath) -e'
 
 - task: Maven@3
+  condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/test'))
   inputs:
     mavenPomFile: '$(system.defaultWorkingDirectory)/pom.xml'
     mavenOptions: '-Xmx3072m'
