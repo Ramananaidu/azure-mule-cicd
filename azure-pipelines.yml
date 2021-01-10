@@ -12,7 +12,17 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+
 steps:
+- task: CacheBeta@0
+  inputs:
+    key: $(Build.SourcesDirectory)/pom.xml
+    path: $(MAVEN_CACHE_FOLDER)
+  displayName: Cache Maven local repo
+
 - task: DownloadSecureFile@1
   name: mvnSettings
   displayName: 'Download Maven settings'
@@ -26,7 +36,7 @@ steps:
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
-    goals: 'clean deploy -DskipMunitTests -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -Denv=test -Dazure.password=$(AZURE_TOKEN) -Dnexus.username=$(NEXUS_UERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -s $(mvnSettings.secureFilePath) -e'
+    goals: 'clean deploy -DskipMunitTests -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -Denv=test -Dazure.password=$(AZURE_TOKEN) -Dnexus.username=$(NEXUS_UERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -s $(mvnSettings.secureFilePath) -e $(MAVEN_OPTS)'
 
 - task: Maven@3
   condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/test'))
