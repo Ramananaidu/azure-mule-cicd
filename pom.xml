@@ -5,7 +5,7 @@
 	<groupId>com.mycompany</groupId>
 	<!-- update the groupId -->
 	<artifactId>cicd-example</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>mule-application</packaging>
 
 	<name>cicd-azure</name>
