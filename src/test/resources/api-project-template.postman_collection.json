@@ -1,0 +1,108 @@
+{
+	"info": {
+		"_postman_id": "09562a8e-f22e-419d-844d-2e2891cb6e14",
+		"name": "api-project-template",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "ping",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "x_correlation_id",
+						"value": "{{$guid}}",
+						"type": "text"
+					},
+					{
+						"key": "x_message_timestamp",
+						"value": "2021-01-11T17:49:43.272+01:00",
+						"type": "text"
+					},
+					{
+						"key": "x_message_id",
+						"value": "{{$guid}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "x_correlation_id_internal_esb",
+						"value": "{{$guid}}",
+						"type": "text"
+					},
+					{
+						"key": "x_request_id",
+						"value": "{{$guid}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "x_external_reference_id",
+						"value": "ExternalReferenceId",
+						"type": "text"
+					},
+					{
+						"key": "x_domain",
+						"value": "effe",
+						"type": "text"
+					},
+					{
+						"key": "x_origin",
+						"value": "ESB",
+						"type": "text"
+					},
+					{
+						"key": "x_destination",
+						"value": "ESB",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "x_client_id",
+						"value": "adri",
+						"type": "text"
+					},
+					{
+						"key": "x_client_secret",
+						"value": "geheim",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{hostname}}:{{port-p}}/esnl.nl/procurement/p/v1/ping?query1=query1&query2=query2",
+					"protocol": "http",
+					"host": [
+						"{{hostname}}"
+					],
+					"port": "{{port-p}}",
+					"path": [
+						"esnl.nl",
+						"procurement",
+						"p",
+						"v1",
+						"ping"
+					],
+					"query": [
+						{
+							"key": "query1",
+							"value": "query1"
+						},
+						{
+							"key": "query2",
+							"value": "query2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

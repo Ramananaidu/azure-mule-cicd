@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="some-system-api-operations-get-something-sub-flow" doc:id="3ae51e85-3cc7-4d0b-98b0-0558b070c7e9" >
+		<json-logger:logger doc:name="Before Request Logger" doc:id="e092565e-fc9d-40cc-9a79-b771fafb0d1a" config-ref="JSON_Logger_Config" message="Before request: Get [significant-name]" tracePoint="BEFORE_REQUEST" >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    header: JSONLoggerModule::stringifyNonJSON(vars.apiHeader)
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<ee:transform doc:name="Replace RequestIds" doc:id="9a5717e2-e5de-44a7-9c77-2cd5682d9412">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="apiHeader"><![CDATA[%dw 2.0
+import dw::local_common_functions
+output application/json
+var requestId = uuid()
+var previousRequestId = if(vars.apiHeader.x_request_id != null) (vars.apiHeader.x_request_id) else ("no previous request id")
+---
+local_common_functions::updateRequestIdsApiHeader(vars.apiHeader, requestId, previousRequestId)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<json-logger:logger doc:name="After Request Logger" doc:id="d4274486-9487-4d33-9266-529a5abfd2f5" config-ref="JSON_Logger_Config" message="Before request: Get [significant-name]" tracePoint="AFTER_REQUEST" >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    header: JSONLoggerModule::stringifyNonJSON(vars.apiHeader)
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+</mule>

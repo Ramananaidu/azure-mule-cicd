@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+    <http:listener-config name="api-template-httpListenerConfig">
+        <http:listener-connection host="${secure::api-template-api.http.host}" port="${secure::http.port-prc}" />
+    </http:listener-config>
+    <apikit:config name="api-template-config" api="resource::acaa33df-3e36-4b98-b8d0-25b8c8f70d67:api-spec-template:1.0.0:raml:zip:api-spec-template.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="api-template-main">
+        <http:listener config-ref="api-template-httpListenerConfig" path="${secure::api.path}/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <flow-ref doc:name="common-assign-correlation-id-sub-flow" doc:id="7a2b1813-7a16-4e91-ba71-c0af3d527a9f" name="common-assign-correlation-id-sub-flow" />
+        <flow-ref doc:name="common-intialize-logging-variables-flow" doc:id="56ec32ac-dcda-45d7-841d-a460bf812df0" name="common-intialize-logging-variables-flow" />
+        <apikit:router config-ref="api-template-config" />
+        <error-handler ref="common-error-handler" />
+    </flow>
+    <flow name="get:\status:api-template-config">
+        <ee:transform doc:name="Replace RequestIds" doc:id="8137b290-df38-4ca5-b00d-fbd5cf662485">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="apiHeader"><![CDATA[%dw 2.0
+import dw::local_common_functions
+output application/json
+var requestId = uuid()
+var previousRequestId = if(vars.apiHeader.x_request_id != null) (vars.apiHeader.x_request_id) else ("no previous request id")
+---
+local_common_functions::updateRequestIdsApiHeader(vars.apiHeader, requestId, previousRequestId)]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <json-logger:logger doc:id="cfaea9c6-f917-4685-91fc-c95078bd0456" config-ref="JSON_Logger_Config" message="Start of the flow: Get Ping" doc:name="Start Logger">
+            <json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    uriParams: JSONLoggerModule::stringifyNonJSON(vars.logUriParams),
+    queryParams: JSONLoggerModule::stringifyNonJSON(vars.logQueryParams),
+    header: JSONLoggerModule::stringifyNonJSON(vars.apiHeader)
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <ee:transform doc:name="Set FlownameVersion" doc:id="faf49eef-0972-41fe-baf0-42f9b0c4cfa8">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable resource="dw/flowname_version.dwl" variableName="flownameVersion" />
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="api-template-api-status-get-1.00.00-flow" doc:id="066f47cd-c47a-4d82-bc3a-db825dda085d" name="api-template-api-status-get-1.00.00-flow" />
+        <json-logger:logger doc:id="747f418b-3c18-412e-b398-5a8268b06f6f" config-ref="JSON_Logger_Config" message="End of flow : Get Ping" tracePoint="END" doc:name="End Logger">
+            <json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    header: JSONLoggerModule::stringifyNonJSON(vars.apiHeader)
+}]]]></json-logger:content>
+        </json-logger:logger>
+    </flow>
+</mule>

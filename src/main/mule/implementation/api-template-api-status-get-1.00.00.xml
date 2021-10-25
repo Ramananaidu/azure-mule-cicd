@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow name="api-template-api-status-get-1.00.00-flow" doc:id="c17717d1-bd7e-4ef8-b132-b741416d56cb" >
+		<flow-ref doc:name="some-backend-operations-get-something-sub-flow" doc:id="ad8f31c9-f56f-428e-a7c1-7a4633de41a2" name="some-backend-operations-get-something-sub-flow"/>
+		<flow-ref doc:name="some-system-api-operations-get-something-sub-flow" doc:id="5564db80-9eb3-46a0-9fec-cc0513211e40" name="some-system-api-operations-get-something-sub-flow" />
+		<ee:transform doc:name="Create Response" doc:id="fdd2b2d4-b8d7-43ce-8e36-541067ebfda0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Healthcheck API ok"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+</flow>
+</mule>

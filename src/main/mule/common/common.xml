@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="common-assign-correlation-id-sub-flow" doc:id="12148510-3030-4c78-a3d8-cdf6e36e6077" >
+		<try doc:name="Try" doc:id="3670149c-7e65-4c42-ad23-c34784f4f712" >
+			<choice doc:name="Enforce CorrelationId?" doc:id="e02482c4-5870-42c7-8734-a1c1899ea9ee" >
+				<when expression="#[p('correlation.enforce')== &quot;true&quot;]">
+					<validation:is-not-null doc:name="CorrelationId Is Not Null" doc:id="1e1a473b-e562-4fb9-8cb2-47c611ee693d" value='#[attributes.headers."x_correlation_id"]' message="x_correlation_id header is mandatory"/>
+					<set-variable value='#[attributes.headers."x_correlation_id"]' doc:name="Assign CorrelationId" doc:id="6b6b2135-7ea0-4673-a98d-a892741e08a7" variableName="correlationId"/>
+				</when>
+				<otherwise >
+					<set-variable value='#[if (attributes.headers."x_correlation_id" != null) 
+	attributes.headers."x_correlation_id"
+else
+	correlationId]' doc:name="Assign CorrelationId" doc:id="ea336480-6ac3-4d8e-93f5-d43526fdd632" variableName="correlationId"/>
+				</otherwise>
+			</choice>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8ac8ada6-da0c-4a1e-89ec-0e9ebeed84aa" type="ANY">
+					<set-variable value="CORRELATION_REQUIRED" doc:name="Set Error Type" doc:id="da8d1ff8-ad3e-401c-a1d0-0e63f4ddbdcf" variableName="errorType"/>
+					<set-variable value="400" doc:name="Set Error Code" doc:id="cca532a8-32fb-4ca1-aeef-d4cb2d4895fc" variableName="errorCode"/>
+					<json-logger:logger doc:id="b814c337-1db6-4478-aba1-ec26773643da" doc:name="" config-ref="JSON_Logger_Config" message="Error Response " tracePoint="EXCEPTION" priority="ERROR">
+					</json-logger:logger>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+	</sub-flow>
+	<sub-flow name="common-intialize-logging-variables-flow" doc:id="bcaf5ed7-04ba-4133-9315-e964c43e5af4" >
+		<ee:transform doc:name="Initialize LogUriParams LogQueryParams ApiHeader" doc:id="5ea4eea6-ce2c-4cc2-a805-b3ecd2716ccf" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable resource="dw/log_uri_params.dwl" variableName="logUriParams" />
+				<ee:set-variable resource="dw/log_query_params.dwl" variableName="logQueryParams" />
+				<ee:set-variable resource="dw/set_api_header.dwl" variableName="apiHeader" />
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set LogPayload to Java" doc:id="4d1da2dd-8094-4786-a162-84f18c3b6c3b" variableName="logPayload" mimeType="application/java"/>
+	</sub-flow>
+
+</mule>

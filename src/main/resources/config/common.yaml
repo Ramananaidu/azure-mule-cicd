@@ -1,0 +1,22 @@
+## Common settings for all APIs
+
+# Define properties in alphabetical order
+
+# Whether or not a x_correlation_id must be set prior to calling this service
+correlation:
+  enforce: "true"
+ 
+# Error message for different error type in global error handler
+errorMessage:
+  any: "An Internal error ocurred while processing the request."
+  connectivity: "An error has occurred while connecting to backend system and the error description is : "
+  unauthorized: "An error has occurred while connecting to backend system and the error description is : "
+
+# JSON Logger configuration
+json:
+  logger:
+    application:
+#      name: "${project.artifactId}"
+#      version: "${project.version}"
+      name: "${secure::api.name}"
+      version: "${secure::api.version.major}.${secure::api.version.minor}.${secure::api.version.patch}"

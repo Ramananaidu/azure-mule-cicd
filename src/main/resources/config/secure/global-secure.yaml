@@ -1,0 +1,26 @@
+## Global secure settings for this API
+
+# Define properties in alphabetical order
+
+api:
+#  domain: "domain-not-yet-set"
+  domain: "procurement"
+#  layer: "e|p|s"
+  layer: "p"
+  name: "api-template-api"
+  path: "/${secure::api.site-domain-name}/${secure::api.domain}/${secure::api.layer}/v${secure::api.version.major}"
+  site-domain-name: "esnl.nl"
+  version:
+    major: "1"
+    minor: "0"
+    patch: "0"
+
+http:
+  port-exp: "8041"
+  port-prc: "8042"
+  port-sys: "8043"
+
+https:
+  port-exp: "8041"
+  port-prc: "8042"
+  port-sys: "8043"

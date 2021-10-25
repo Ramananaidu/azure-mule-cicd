@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="common-error-handler" doc:id="8e1c343e-1f07-421d-a0ab-11ca59caa64a" >
+		<on-error-propagate type="APIKIT:BAD_REQUEST">
+			<set-variable value="#[400]" doc:name="Http Status 400" doc:id="12ca0ae6-da2a-4a8a-8b98-2adc581af1b2" variableName="httpStatus"/>
+			<set-variable value='#["Bad Request"]' doc:name="Set Error Message" doc:id="0a9a511b-c579-41b6-b53f-397d6842f36a" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="20a073d1-a747-422e-ab89-bd00e7bb0698" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_FOUND">
+			<set-variable value="#[404]" doc:name="Http Status 404" doc:id="e8b0ea7f-81cf-4e9f-9b45-ff3c7069555d" variableName="httpStatus" />
+			<set-variable value='#["Not Found"]' doc:name="Set Error Message" doc:id="3f013d58-75b0-4bbc-957c-f3c98a179532" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="ba063753-ba22-45a9-8988-86958ed31f17" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+			<set-variable value="#[405]" doc:name="Http Status 405" doc:id="9f2e33df-0b28-4ca1-a312-b59088ec6773" variableName="httpStatus" />
+			<set-variable value='#["Method Not Allowed"]' doc:name="Set Error Message" doc:id="17a3f60f-8cea-4d0b-9d0a-d76a2fb93464" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="a0f22ca7-779c-4b76-a7f2-117ce5620efa" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+			<set-variable value="#[406]" doc:name="Http Status 406" doc:id="0f33acc3-9712-4416-be3b-17ab5cdc8a70" variableName="httpStatus" />
+			<set-variable value='#["Not Acceptable"]' doc:name="Set Error Message" doc:id="b7bf9804-4e72-4f26-9b61-a6cde42a1280" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="41838645-4e24-4d72-8215-d04dce5eda6b" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<set-variable value="#[415]" doc:name="Http Status 415" doc:id="5cf408ac-4835-46d8-b44b-acb6f7ae7b84" variableName="httpStatus" />
+			<set-variable value='#["Unsupported Media Type"]' doc:name="Set Error Message" doc:id="b14205a6-b50a-41e5-bb30-407d3a5232cb" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="ae75b81e-3ccb-4e89-8075-8fc6daa3c39c" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+			<set-variable value="#[501]" doc:name="Http Status 501" doc:id="e38cef29-6adc-4e9e-9d9d-3cf94dd299cf" variableName="httpStatus" />
+			<set-variable value='#["Not Implemented"]' doc:name="Set Error Message" doc:id="b065e020-e1ed-49af-be4f-412df851977f" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="a2b0acb8-d6b2-419f-b7d7-36d18ff2c6cf" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cae858f4-2244-4449-92dd-37c261f4b054" type="HTTP:CONNECTIVITY">
+			<set-variable value="#[503]" doc:name="Http Status 503" doc:id="845937f9-88d9-40c2-8720-122ca672f4e7" variableName="httpStatus" />
+			<set-variable value='#["Service Unavailable"]' doc:name="Set Error Message" doc:id="2faa98cd-9dcb-4f94-bae1-d072a72ef850" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="35b8caff-85e4-4721-b042-026a7919d9b6" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="de80c32f-4d6f-4f78-bcb5-1d2620a8dd92" type="HTTP:UNAUTHORIZED">
+			<set-variable value="#[401]" doc:name="Http Status 401" doc:id="b3c652ed-550e-4a73-954a-173b0f52f03a" variableName="httpStatus" />
+			<set-variable value='#["Unauthorized"]' doc:name="Set Error Message" doc:id="7a002a05-bbd1-4c45-822c-55dfef893168" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="dbd993ea-f9c6-4c2c-a4ba-7e5f61a92fdb" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d619069d-042d-4f1a-b737-ea13ea579ddb" type="HTTP:FORBIDDEN">
+			<set-variable value="#[403]" doc:name="Http Status 403" doc:id="b3aced2f-4d9c-4db7-8b8c-f685c5a0ccae" variableName="httpStatus" />
+			<set-variable value='#["Forbidden"]' doc:name="Set Error Message" doc:id="777ba496-9c09-4c3b-aa18-2e27b18fdd4e" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="b3b2e41e-19f8-437c-9f75-8041186bf8f8" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="df312ec6-32f3-4ddf-9540-586ee9dabf32" when="#[error.errorMessage.payload.status !=null]">
+			<set-variable value="#[error.errorMessage.payload.statusCode]" doc:name="Set Http Status" doc:id="d16639b5-3145-4a9d-a72b-61eaa512b66a" variableName="httpStatus" />
+			<ee:transform doc:name="Create Error Message" doc:id="da2f3b8a-3b5d-4df5-8884-b9634c2434ae" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[error.errorMessage.attributes.statusCode]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<ee:transform doc:name="Replace RequestIds" doc:id="e3da7c14-e382-4e2d-8aa2-010936ee3c61">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="apiHeader"><![CDATA[%dw 2.0
+import dw::local_common_functions
+output application/json
+var requestId = uuid()
+var previousRequestId = if(vars.apiHeader.x_request_id != null) (vars.apiHeader.x_request_id) else ("no previous request id")
+---
+local_common_functions::updateRequestIdsApiHeader(vars.apiHeader, requestId, previousRequestId)]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<set-variable value="#[payload]" doc:name="Set LogPayload to Java" doc:id="97a37219-3317-4a97-967b-7114244b544c" variableName="logPayload" mimeType="application/java" />
+			<json-logger:logger doc:name="Error Logger" doc:id="1ee20cfc-e294-4477-aed4-e6e66fa764f2" config-ref="JSON_Logger_Config" message="Error response from error handler" tracePoint="EXCEPTION" priority="ERROR" >
+				<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    header: JSONLoggerModule::stringifyNonJSON(vars.apiHeader),
+    payload: if(isEmpty(vars.logPayload)) ("empty") else (JSONLoggerModule::stringifyNonJSON(payload))
+}]]]></json-logger:content>
+			</json-logger:logger>
+		
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b0a6eaf1-d361-4924-a8e5-8924f8ea11e4" type="ANY">
+			<set-variable value="#[if(vars.errorCode != null) vars.errorCode else 500]" doc:name="Set Http Status" doc:id="d5242ef9-d946-4711-b371-10d35a4c71de" variableName="httpStatus"/>
+			<set-variable value='#["Unexpected Error"]' doc:name="Set Error Message" doc:id="5aa45993-9523-4829-907b-7b86a63c26c3" variableName="errorMessage"/>
+			<flow-ref doc:name="global-error-handler-response-sub-flow" doc:id="f8bc823e-03a9-4c0b-8006-3acff53f369b" name="global-error-handler-response-sub-flow"/>
+		</on-error-propagate>
+</error-handler>
+	<sub-flow name="global-error-handler-response-sub-flow" doc:id="b24bdb42-9050-4d03-bc27-cc1ebd8ffd15" >
+		<ee:transform doc:name="Create Error Response" doc:id="c5af549a-61a4-48c3-8f2e-f65794d183e5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"error":
+	if(vars.isCustomError != null and vars.isCustomError == true) payload else 
+		{
+			"error_type" : if(vars.errorType != null) vars.errorType else (error.errorType.identifier default ""),
+			"error_code" : if(vars.errorCode != null) vars.errorCode else (error.errorType default ""), 
+		 	//"error_date_time": now() as String { format: "yyyy-MM-dd'T'HH:mm:ss" },
+		 	"error_date_time": now(),
+			"error_message" : if(vars.errorMessage != null) vars.errorMessage else (error.description default ""), 
+			"error_description" : if(vars.errorDescription != null) vars.errorDescription else (error.description default ""), 
+			"error_http_status": vars.httpStatus,
+			"correlation_id" : vars.correlationId default "",
+			"external_reference_id" : vars.x_external_reference_id default ""
+		}
+}
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Replace RequestIds" doc:id="be5c62d5-bb28-46df-ba69-35cedaccfc4b">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="apiHeader"><![CDATA[%dw 2.0
+import dw::local_common_functions
+output application/json
+var requestId = uuid()
+var previousRequestId = if(vars.apiHeader.x_request_id != null) (vars.apiHeader.x_request_id) else ("no previous request id")
+---
+local_common_functions::updateRequestIdsApiHeader(vars.apiHeader, requestId, previousRequestId)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set LogPayload to Java" doc:id="516e85fb-d314-48fd-b09b-86fe31a8f99b" variableName="logPayload" mimeType="application/java" />
+		<json-logger:logger doc:name="Error Logger" doc:id="5f63d8b1-da13-4b61-bf59-fa3e21f62174" config-ref="JSON_Logger_Config" message="Error response from error handler" tracePoint="EXCEPTION" priority="ERROR" >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    header: JSONLoggerModule::stringifyNonJSON(vars.apiHeader),
+    payload: if(isEmpty(vars.logPayload)) ("empty") else (JSONLoggerModule::stringifyNonJSON(payload))
+}]]]></json-logger:content>
+		</json-logger:logger>
+	
+</sub-flow>
+</mule>

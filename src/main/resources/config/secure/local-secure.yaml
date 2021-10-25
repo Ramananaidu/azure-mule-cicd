@@ -1,0 +1,24 @@
+## Secure settings that are specific for the local environmment
+
+# Define properties in alphabetical order
+
+api-template-api:
+# auth:
+#    x-client-id: "5c78c68c517d4840bdded76d7542c5e9"
+#    x-client-secret: "d5cbB8BB3F61402e8e4B3bD5F7451D4F"
+  http:
+    host: "localhost"
+  https:
+    host: "localhost"
+
+cert:
+  alias: "mule"
+  key:
+    password: "EenMooiWachtwoord"
+
+keystore:
+  password: "EenMooiWachtwoord"
+
+truststore:
+  insecure: "true"
+  password: "<niet ingericht>"

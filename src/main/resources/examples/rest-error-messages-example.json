@@ -1,0 +1,12 @@
+{
+	"error": {
+		"error_type": "NOT_FOUND",
+		"error_code": "APIKIT:NOT_FOUND",
+		"error_date_time": "2016-03-10T20:16:45.001Z",
+		"error_message": "Not found",
+		"error_description": "Some detailed description",
+		"error_http_status": "404",
+		"correlation_id": "10d00522-f6e6-4876-b68b-dfb9c86b5638",
+		"external_reference_id": "Workorder: 1234567890"
+	}
+}

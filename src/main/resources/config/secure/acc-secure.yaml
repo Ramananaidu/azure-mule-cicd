@@ -1,0 +1,24 @@
+## Secure settings that are specific for the development environmment
+
+# Define properties in alphabetical order
+
+api-template-api:
+# auth:
+#    x-client-id: "5c78c68c517d4840bdded76d7542c5e9"
+#    x-client-secret: "d5cbB8BB3F61402e8e4B3bD5F7451D4F"
+  http:
+    host: "<unknown>"
+  https:
+    host: "<unknown>"
+
+cert:
+  alias: "mule"
+  key:
+    password: "<unknown>"
+
+keystore:
+  password: "<unknown>"
+
+truststore:
+  insecure: "false"
+  password: "<unknown>"

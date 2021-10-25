@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="99d840a7-b14f-4687-baa4-10f689ae80fb" >
+		<tls:key-store type="jks" path="certificates/${mule-env}-keystore.jks" alias="${secure::cert.alias}" keyPassword="${secure::cert.key.password}" password="${secure::keystore.password}" />
+	</tls:context>
+	<global-property doc:name="Global Property" doc:id="b9a4ef5d-439b-4ec2-aeac-12ccb0965a42" name="mule-env" value="local" />
+	<configuration-properties doc:name="Configuration properties" doc:id="33c1da2f-2956-4550-857d-e86f629d9cee" file="config/common.yaml" doc:description="load common properties of an application"/>
+	<configuration-properties doc:name="Configuration properties" doc:id="551a0974-c00d-4055-add7-ae85f1529132" file="config/${mule-env}.yaml" doc:description="load environment specific properties of an application"/>
+	<secure-properties:config name="Global_Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="752dccfc-47fb-4fb9-9344-559a6ee4874e" file="config/secure/global-secure.yaml" key="${config.decoding.key}">
+		<secure-properties:encrypt algorithm="Blowfish" mode="ECB" />
+	</secure-properties:config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="52c72c04-4ff6-4fd5-9d24-aa8fc05cc033" file="config/secure/${mule-env}-secure.yaml" key="${config.decoding.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" mode="ECB" />
+	</secure-properties:config>
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="3d8c630f-3412-47a4-8f68-b1c65637f51a" environment="${mule-env}" disabledFields="${json.logger.disabledFields}" contentFieldsDataMasking="${json.logger.contentFieldsDataMasking}"/>
+<!-- 	<api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="f18fa8ee-1407-4567-9f97-906bbbb6d966" flowRef="customer-sapi-main" /> -->
+
+</mule>

@@ -1,39 +1,85 @@
 # Maven
 # Author : Manish
-# Build your Java project and run tests with Apache Maven.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
   branches:
     include:
-      - test
       - develop
       - main
   paths:
    exclude:
-     - README.md
      - azure-pipelines.yml
 
 pool:
   vmImage: 'ubuntu-latest'
+  
+variables:  
+#- ${{ if eq(variables['build.SourceBranchName'], 'develop') }}:
+ # - group: AnypointPlatform-DEV
+- group: AnypointPlatform-DEV 
+- group: mule-devops-profile
+- name:  MAVEN_CACHE_FOLDER
+  value: $(Pipeline.Workspace)/.m2/repository
+- name:  MAVEN_OPTS
+  value: -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)
 
-variables:
-  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
-  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
 steps:
+# Cache the maven local repository
 - task: CacheBeta@0
   inputs:
     key: $(Build.SourcesDirectory)/pom.xml
     path: $(MAVEN_CACHE_FOLDER)
   displayName: Cache Maven local repo
 
+# Download settings.xml file
 - task: DownloadSecureFile@1
   name: mvnSettings
   displayName: 'Download Maven settings'
   inputs:
     secureFile: 'settings.xml'
+
+# Get the access token for anypoint connected app- "esnl-mule-devops-dev"
+- bash: |
+   
+   echo "##vso[task.setvariable variable=ACCESS_TOKEN]$(curl -X POST https://eu1.anypoint.mulesoft.com/accounts/api/v2/oauth2/token \
+   -H 'Content-Type: application/json' \
+   -d "{\"grant_type\": \"client_credentials\", \"client_id\": \"$(AppClientId)\", \"client_secret\": \"$(AppSecret)\"}" \
+   | sed -n 's|.*"access_token":"\([^"]*\)".*|\1|p')"
+   
+   
+  displayName: 'Bash Script'
+
+# Build , run munit testcases and deploy to the Development enviornment(DEV) of Cloudhub
+- task: Maven@3
+  condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  inputs:
+    mavenPomFile: '$(system.defaultWorkingDirectory)/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    goals: 'clean deploy -DmuleDeploy -DskipMunitTests -DauthToken=$(ACCESS_TOKEN) -Denvironment=$(Environment) -Danypoint.clientId=$(ClientId) -Danypoint.secret=$(Secret) -Dconfig.decoding.key=$(decryptionKey) -Dmule-env=${Environment} -s $(mvnSettings.secureFilePath) -e $(MAVEN_OPTS)'
+
+# Checkout main branch for release
+- bash: |
+   git config --global user.email "ST6186@engie.com"
+   git config --global user.name "ST6186"
+   git checkout main
+  displayName: 'Bash Script'
+  condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
+# Add SSH key for ssh communication with github repository 
+- task: InstallSSHKey@0
+  displayName: 'Install an SSH key'
+  inputs:
+    knownHostsEntry: 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
+    sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC/Wgtvu6j1eMkl1W76pOWhWhlWDFVLb6dR1GYPzXkxHe/1FmqUrL7hEt4JvwPWM4FQZoZGy1HKvGHiX9Nca4TDu7Om36b1chanQVAfxT/Wr+moLGG28AcnLwlYrSCmGnhbJb9CyGHqq7cv1dw6SFON+0DGK8vqphXfHnDonxhvAfUo+vXsgCGqB42LZNz+wpoTpMOEgdtOLuqoCWaSBoYl0juVWKXJRQTFJAr2LGJFLm59eEsvvC0i2z6AYEby3xn3r3Pu+s606f4PJfF4vUtoE2M2TE8HIGnqv8jEOt5St8/Lvfb4f5VySNEBPf1q/ZuV3r/eIcXdy/o0JSrzs5A+AdMjnTAzSCas09PKS4hc4pOMZrSnlU/pC8woCCgMWL+1f4vnFV16ClUeRijVlPqPKCR8huo6uu0o30yqtraJYWTVC0al1rz3t185pLK9jpKMsH7kEH1cmIFE/wqcynUsDS26sZtwI7mpOuzQXFfZjP6AM17A7eAI4t52GRkEL69kmDqNTGR3A/RCXw/t/HQA2I9V2lgu2eLq9mFNtGo/ykB5zNk6WJVMi353PMmJ8fuenTNxMtrcaxW9QLRaaIlRvq7puwW8voSpeDlS2JnERU18cTGIwLhYqrpU7UHrMs7ftG9t/JuY4bY/Aht80d7y26hlFCpzm5bFEx5CFofK4Q== ST6186@engie.com'
+    sshKeySecureFile: 'id_rsa'
+
+# Create release artificate and create next development snapshot version. Deploy release artifact to the azure feed.
 - task: Maven@3
   condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   inputs:
@@ -42,17 +88,7 @@ steps:
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
-    goals: 'clean deploy -DskipMunitTests -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -Denv=test -Dazure.password=$(AZURE_TOKEN) -Dnexus.username=$(NEXUS_UERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -s $(mvnSettings.secureFilePath) -e $(MAVEN_OPTS)'
-
-- task: Maven@3
-  condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/test'))
-  inputs:
-    mavenPomFile: '$(system.defaultWorkingDirectory)/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'clean install -Dazure.password=$(AZURE_TOKEN) -Dnexus.username=$(NEXUS_UERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -s $(mvnSettings.secureFilePath) -e'
+    goals: 'release:clean release:prepare --batch-mode release:perform -s $(mvnSettings.secureFilePath) -e $(MAVEN_OPTS) -DauthToken=$(ACCESS_TOKEN)'
 

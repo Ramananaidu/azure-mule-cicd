@@ -1,0 +1,21 @@
+## Non secure settings that are specific for the local environmment
+
+# Define properties in alphabetical order
+
+# Flownames and versions
+flowname:
+  version:
+    # Versions for all {api-name}-status resource handlers
+    status:
+      get: "1.00.00"
+      post: "1.00.00"
+
+# JSON Logger configuration
+json:
+  logger:
+    # Indicate which fields should be masked
+    # Can be JSON fields and/or JSON paths:
+    #  name,email,phone,$.payload.addresses[1],$..state
+    contentFieldsDataMasking: "null"
+    # Indicate which fields should not be logged
+    disabledFields: "null"
