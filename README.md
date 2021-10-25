@@ -1,46 +1,34 @@
-#WELCOME#:
-=======
+# Overview of Azure pipeline yaml file 
+This yaml file will be embedded in the mule project template so that each project will have automatically azure pipeline yaml file available and hence developer doesn't need to configure the pipeline setting or create pipeline yaml file.
 
-This is an API template based on mule-4 tset to provide uniform structure across the organization and enforce some of the best practices. 
-It provides the necessary structure to extend or customize as per project requirement in a standard way. Here is the overview of what was created.
+## Build and Deploy to DEV environment : 
+- Trigger Point : When pull request is approved to merge to develop branch then it trigger the azure pipeline and perform following tasks:
+- Get the source code and run munit test cases
+- On successful passing of test cases , build the package and deploy to the development environment of cloudhub using a connected app.
+- Using connected app clientId and secret , get the token and use it to deploy to the cloudhub environment.
+Optionally additional steps can be added to send an email on failure to the developer.
 
-#PROJECT STRUCTURE#:
-==================
+## Create Release artifact and upload to the Azure artifact feed using Maven Release: 
+- Trigger Point : When the develop branch is merged to the main/master branch once pull request is approved , then perform the following tasks:
+- Release Clean: Remove any existing artifacts used in previous releases (e.g. old release.properties
+- Release Prepare: Performs the following functions:
+Checks that no dependencies are using SNAPSHOT versions
+Updates the application version to a release version (drops the -SNAPSHOT suffix)
+Tags the repository with a new Release Candidate tag (e.g. rc1.0.0)
+Updates the application version to the next development version – e.g. 1.0.1-SNAPSHOT
+- Release Perform:
+Deploys the release code (based on the tag created in release:prepare) to Azure Artifacts. This release artifact from feed will be used by the release pipelines to deploy to the higher environments(Eg. ACC ,PROD). 
 
-By default project name is mentioned as "api-project-template". Rename the project name as per your need by maintaining the same naming convention, for eg. s-primavera-assettypes-api.
-a. Create separate xml file for implementation. For eg. s-primavera-assettypes-api_assettypes-get-1.00.00.xml. Note to use a version number for an implementation file. We can use this as a feature toggle mechanism.
-b. global-config.xml: All resource configuration or setting should be placed in the global-config.xml file
-c. global-error-handler.xml: Generic global-error-handler is created by default. You can add or remove any error type to meet the project requirement.
-d. Remove/customize default created api-template.xml file.
-e. Make sure [JSON-logger](https://blogs.mulesoft.com/dev/anypoint-platform-dev/json-logging-mule-4/) is published in Anypoint platform Org/Business Group
-e. Keep your project modular.
+## Release Pipeline
+For each project a separate release pipeline will be cloned from the Release pipeline template in the Azure devops.
+Deployment of artifact to the ACC environment from azure artifact feed is currently designed to be manual but can be configured to automatically(If Needed) deploy to ACC once release artifact is created using Maven release plugin.
+Promotion to the production environment(PROD) is designed to to be manual approval , meaning manual trigger of release pipeline.
 
-#POM XML#:
-========
+### Release Pipeline Variable
+It is used to set variable at stage or release level in the release pipeline
 
-A maven project descriptor that describes how to build this project. This is based on the parent-child pom model where child pom inherits the parent POM configuration.
-By default following plugins are added:
-a. maven-release-plugin : This plugin is used to perform maven release feature.
-b. mule-maven-plugin : This plugin is used to perform mule goals like deployment, un-deployment.
-c. munit-maven-plugin : This plugin is used to run munit test cases and generate coverage report.
-
-scm connection: scm connection detail is used during the maven release. Please change it if repository url get changed.
-
-dependency: following dependencies are inherited from the parent POM .
-d. munit-runner
-e. munit-tools
-
-IMPORTANT!: Make sure parent POM is installed(mvn clean install) in your local .m2 repository or your setting.xml should contains the external remote repository where parent POM is available.
-
-#CONFIG FOLDER#:
-=============
-
-The config folder contains the 4 environment related yaml files and a common configuration file. All configurable information should be present in the yaml file.
-Sensitive information should be encrypted by strong master key and key should *not* be hardcoded in the project. Provide key in the studio argument section while running your project.
-Add sensitive property into the mule-artifact.json (secure::...) so that property value can be updated directly in cloudhub platform.
-
-#CERTIFICATES FOLDER#:
-===================
-
-certificates folder is created which contains by default local certificates. Keep any other certificates in the same folder.
-If your project doesn't need certificate or not require the https listner then certificate folder can be removed.
+Following tasks are performed by Release Pipeline
+- Download maven settings.xml file  – Download the secure settings.xml file which is used to store credential and other maven related information.
+- Get Artifact and the pom xml file – Get the latest version of artifact(default get the latest one)  and corresponding pom xml file from azure feed .
+- Get the access token for connected app(ACC/PRD)
+- Deploy to Cloudhub – Deploys the artifact to CloudHub using the Mule Maven plugin command. These artifacts use a combination of pipeline variables, and variable groups to derive the required values needed to deploy artifacts to Cloudhub.
