@@ -65,8 +65,8 @@ steps:
 
 # Checkout main branch for release
 - bash: |
-   git config --global user.email "ST6186@engie.com"
-   git config --global user.name "ST6186"
+   git config --global user.email "naidu4cse@gmail.com"
+   git config --global user.name "Kartheek"
    git checkout main
   displayName: 'Bash Script'
   condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/main'))
